@@ -1,0 +1,24 @@
+{
+	"navigation": {
+		"home": "Início",
+		"flowLauncher": "Flow Launcher",
+		"emails": "Emails",
+		"smartEvents": "Eventos Inteligentes"
+	},
+	"settings": {
+		"theme": "Tema",
+		"language": "Idioma",
+		"light": "Claro",
+		"dark": "Escuro"
+	},
+	"languages": {
+		"en": "Inglês",
+		"pt": "Português"
+	},
+	"dashboard": {
+		"title": "Meu Painel",
+		"welcome": "Bem-vindo ao seu painel",
+		"awsSso": "Conexões AWS SSO",
+		"awsSsoDescription": "Conecte-se às suas contas AWS usando Single Sign-On"
+	}
+}
