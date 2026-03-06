@@ -1,4 +1,5 @@
 import { AppSidebar } from '@/components/app-sidebar';
+import { FlowLauncherProvider } from '@/components/providers/flow-launcher-provider';
 import { LanguageProvider } from '@/components/providers/language-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -32,12 +33,14 @@ export default function RootLayout({
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<ThemeProvider attribute='class' defaultTheme='dark' enableSystem={false} disableTransitionOnChange>
 					<LanguageProvider>
-						<TooltipProvider>
-							<SidebarProvider>
-								<AppSidebar />
-								<main className='w-full'>{children}</main>
-							</SidebarProvider>
-						</TooltipProvider>
+						<FlowLauncherProvider>
+							<TooltipProvider>
+								<SidebarProvider>
+									<AppSidebar />
+									<main className='w-full'>{children}</main>
+								</SidebarProvider>
+							</TooltipProvider>
+						</FlowLauncherProvider>
 					</LanguageProvider>
 				</ThemeProvider>
 			</body>
