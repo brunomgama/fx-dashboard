@@ -2,67 +2,65 @@
 
 import { Button } from '@/components/ui/button';
 import { Calendar, Play, Trash2, Zap } from 'lucide-react';
-import { Event } from '../../types';
+import type { Event } from '../../types';
 
-interface EventCardProps {
+interface Props {
 	event: Event;
-	onTrigger: (event: Event) => void;
-	onDelete: (event: Event) => void;
-	onSelect: (event: Event) => void;
 	isSelected?: boolean;
+	onSelect: (e: Event) => void;
+	onTrigger: (e: Event) => void;
+	onDelete: (e: Event) => void;
 }
 
-export function EventCard({ event, onTrigger, onDelete, onSelect, isSelected }: EventCardProps) {
+export function EventCard({ event, isSelected, onSelect, onTrigger, onDelete }: Props) {
 	return (
-		<div className={`border rounded-lg p-4 flex flex-col h-full hover:border-primary transition-colors cursor-pointer ${isSelected ? 'border-primary bg-primary/5' : ''}`} onClick={() => onSelect(event)}>
-			<div className='flex items-start justify-between mb-3'>
-				<div className='flex-1'>
-					<h3 className='font-semibold text-lg'>{event.name}</h3>
-					<p className='text-sm text-muted-foreground line-clamp-2'>{event.description || 'No description'}</p>
-				</div>
+		<div onClick={() => onSelect(event)} className={`flex h-full cursor-pointer flex-col rounded-lg border p-4 transition-colors hover:border-primary ${isSelected ? 'border-primary bg-primary/5' : ''}`}>
+			<div className='mb-2'>
+				<h3 className='text-base font-semibold'>{event.name}</h3>
+				<p className='line-clamp-2 text-sm text-muted-foreground'>{event.description ?? 'No description'}</p>
 			</div>
 
-			<div className='flex items-center gap-2 text-xs text-muted-foreground mb-3'>
+			<div className='mb-2 flex items-center gap-1 text-xs text-muted-foreground'>
 				<Zap className='h-3 w-3' />
-				<span>{event.flow_ids?.length || 0} flows</span>
+				<span>{event.flow_ids?.length ?? 0} flows</span>
 			</div>
 
 			{event.variables && event.variables.length > 0 && (
-				<div className='flex flex-wrap gap-1 mb-3'>
-					{event.variables.slice(0, 3).map((variable) => (
-						<span key={variable} className='px-2 py-1 text-xs bg-secondary rounded-md'>
-							{variable}
+				<div className='mb-2 flex flex-wrap gap-1'>
+					{event.variables.slice(0, 3).map((v) => (
+						<span key={v} className='rounded-md bg-secondary px-2 py-1 text-xs'>
+							{v}
 						</span>
 					))}
-					{event.variables.length > 3 && <span className='px-2 py-1 text-xs text-muted-foreground'>+{event.variables.length - 3} more</span>}
+					{event.variables.length > 3 && <span className='text-xs text-muted-foreground'>+{event.variables.length - 3}</span>}
 				</div>
 			)}
 
 			{event.created_at && (
-				<div className='flex items-center gap-1 text-xs text-muted-foreground mb-3 pb-3 border-b'>
+				<div className='mb-3 flex items-center gap-1 border-b pb-3 text-xs text-muted-foreground'>
 					<Calendar className='h-3 w-3' />
 					<span>{new Date(event.created_at).toLocaleDateString()}</span>
 				</div>
 			)}
 
-			{/* Spacer to push button to bottom */}
-			<div className='flex-1' />
-
-			{/* Button always at bottom */}
-			<div className='flex items-center gap-2 mt-auto'>
+			<div className='mt-auto flex gap-2'>
 				<Button
 					size='sm'
+					className='flex-1 border border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-gray-50 dark:border-gray-600 dark:bg-transparent dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-white'
 					onClick={(e) => {
 						e.stopPropagation();
 						onTrigger(event);
-					}}
-					className='flex-1'>
-					<Play className='mr-2 h-4 w-4' />
-					Trigger
+					}}>
+					<Play className='mr-2 h-4 w-4' /> Trigger
 				</Button>
 				<Button
 					size='sm'
-					variant='destructive'
+					variant='ghost'
+					className='border border-red-300
+					bg-white text-red-400
+					hover:bg-red-50 hover:text-red-500
+					dark:border-red-800 dark:bg-transparent dark:text-red-500
+					dark:hover:bg-red-950 dark:hover:text-red-400'
 					onClick={(e) => {
 						e.stopPropagation();
 						onDelete(event);

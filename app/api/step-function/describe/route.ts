@@ -1,7 +1,8 @@
-// app/api/step-function/describe/route.ts
-import { DescribeStateMachineCommand, SFNClient } from '@aws-sdk/client-sfn';
-import { fromIni } from '@aws-sdk/credential-providers';
+import { exec } from 'child_process';
 import { NextResponse } from 'next/server';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export async function POST(request: Request) {
 	try {
@@ -11,22 +12,22 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'arn, profile and region are required' }, { status: 400 });
 		}
 
-		const client = new SFNClient({
-			region,
-			credentials: fromIni({ profile }),
-		});
+		const { stdout } = await execAsync(`aws stepfunctions describe-state-machine --state-machine-arn "${arn}" --profile ${profile} --region ${region} --output json`, { timeout: 15000 });
 
-		const result = await client.send(new DescribeStateMachineCommand({ stateMachineArn: arn }));
+		const data = JSON.parse(stdout);
 
 		return NextResponse.json({
-			definition: result.definition,
-			name: result.name,
-			status: result.status,
-			type: result.type,
+			definition: data.definition,
+			name: data.name,
+			status: data.status,
 		});
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-		console.error('Step Function describe error:', error);
-		return NextResponse.json({ error: 'Failed to describe state machine', details: errorMessage }, { status: 500 });
+		const message = error instanceof Error ? error.message : 'Unknown error';
+
+		if (message.includes('ExpiredToken') || message.includes('not authorized')) {
+			return NextResponse.json({ error: 'AWS session expired', details: 'Please reconnect via SSO on the home page' }, { status: 401 });
+		}
+
+		return NextResponse.json({ error: 'Failed to describe state machine', details: message }, { status: 500 });
 	}
 }

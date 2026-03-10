@@ -1,140 +1,101 @@
 'use client';
 
-import { useFlowLauncher } from '@/components/providers/flow-launcher-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { flowLauncherAPI } from '../../api';
-import { Event } from '../../types';
+import { eventsApi } from '../../api';
+import { useFlowLauncherConfig } from '../../hooks/use-flow-launcher-config';
+import type { Event } from '../../types';
 import { CreateEventModal } from './create-event-modal';
 import { EventCard } from './event-card';
 import { EventDetailsPanel } from './event-details-panel';
 import { TriggerEventModal } from './trigger-event-modal';
 
 export function EventsList() {
-	const { environmentConfig, fullConfig } = useFlowLauncher();
+	const { apiConfig } = useFlowLauncherConfig();
 	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string>('');
-	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-	const [showTriggerModal, setShowTriggerModal] = useState(false);
-	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
+	const [error, setError] = useState('');
+	const [search, setSearch] = useState('');
+	const [selected, setSelected] = useState<Event | null>(null);
+	const [triggering, setTriggering] = useState<Event | null>(null);
+	const [showCreate, setShowCreate] = useState(false);
 
-	const loadEvents = useCallback(async () => {
+	const load = useCallback(async () => {
 		setLoading(true);
 		setError('');
 		try {
-			const response = await flowLauncherAPI.listEvents(environmentConfig, { limit: 100 });
-			const eventData = response.results || response.Items || response.items || [];
-			console.log('Loaded events:', eventData.length, 'events from', fullConfig.displayName);
-			setEvents(eventData);
+			const res = await eventsApi.list(apiConfig, { limit: 100 });
+			setEvents(res.results ?? res.items ?? res.Items ?? []);
 		} catch (err) {
-			console.error('Error loading events:', err);
 			setError(err instanceof Error ? err.message : 'Failed to load events');
 		} finally {
 			setLoading(false);
 		}
-	}, [environmentConfig, fullConfig.displayName]);
+	}, [apiConfig]);
 
 	useEffect(() => {
-		loadEvents();
-	}, [loadEvents]);
+		load();
+	}, [load]);
 
-	const handleTriggerEvent = (event: Event) => {
-		setSelectedEvent(event);
-		setShowTriggerModal(true);
-	};
-
-	const handleDeleteEvent = async (event: Event) => {
-		if (!confirm(`Are you sure you want to delete event "${event.name}"?`)) return;
-
+	const handleDelete = async (event: Event) => {
+		if (!confirm(`Delete event "${event.name}"?`)) return;
 		try {
-			await flowLauncherAPI.deleteEvent(environmentConfig, event.id);
-			await loadEvents();
+			await eventsApi.delete(apiConfig, event.id);
+			if (selected?.id === event.id) setSelected(null);
+			await load();
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'Failed to delete event');
 		}
 	};
 
-	const handleSelectEvent = (event: Event) => {
-		setSelectedEventForDetails(event);
-	};
+	const filtered = events.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()) || e.description?.toLowerCase().includes(search.toLowerCase()));
 
-	const filteredEvents = events.filter((event) => event.name.toLowerCase().includes(searchQuery.toLowerCase()) || event.description?.toLowerCase().includes(searchQuery.toLowerCase()));
-
-	if (loading) {
+	if (loading)
 		return (
-			<div className='flex items-center justify-center h-64'>
+			<div className='flex h-64 items-center justify-center'>
 				<Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
 			</div>
 		);
-	}
-
-	if (error) {
+	if (error)
 		return (
-			<div className='flex flex-col items-center justify-center h-64 gap-4'>
+			<div className='flex h-64 flex-col items-center justify-center gap-4'>
 				<p className='text-destructive'>{error}</p>
-				<Button onClick={loadEvents}>Retry</Button>
+				<Button onClick={load}>Retry</Button>
 			</div>
 		);
-	}
 
 	return (
-		<div className='flex gap-4 h-full overflow-hidden'>
-			{/* Left side - Events list */}
-			<div className={`flex flex-col w-2/3 min-h-0`}>
-				{/* Sticky search bar */}
-				<div className='flex items-center gap-4 pb-4 flex-shrink-0'>
+		<div className='flex h-full gap-4 overflow-hidden'>
+			{/* List — 2/3 */}
+			<div className='flex w-2/3 min-h-0 flex-col'>
+				<div className='mb-4 flex items-center gap-3'>
 					<div className='relative flex-1'>
 						<Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-						<Input placeholder='Search events...' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className='pl-10' />
+						<Input placeholder='Search events...' value={search} onChange={(e) => setSearch(e.target.value)} className='pl-10' />
 					</div>
-					<Button onClick={() => setShowCreateModal(true)}>
-						<Plus className='mr-2 h-4 w-4' />
-						Create Event
+					<Button onClick={() => setShowCreate(true)}>
+						<Plus className='mr-2 h-4 w-4' /> Create Event
 					</Button>
-					<h3 className='font-semibold text-lg'>{events.length} Events</h3>
+					<span className='shrink-0 text-sm text-muted-foreground'>{events.length} events</span>
 				</div>
 
-				{/* Scrollable grid */}
-				<div className='overflow-y-auto flex-1 min-h-0'>
-					<div className='grid gap-4 md:grid-cols-2 lg:grid-cols-2 pb-4'>
-						{filteredEvents.map((event) => (
-							<EventCard key={event.id} event={event} onTrigger={handleTriggerEvent} onDelete={handleDeleteEvent} onSelect={handleSelectEvent} isSelected={selectedEventForDetails?.id === event.id} />
+				<div className='flex-1 overflow-y-auto'>
+					<div className='grid gap-4 pb-4 md:grid-cols-2'>
+						{filtered.map((event) => (
+							<EventCard key={event.id} event={event} isSelected={selected?.id === event.id} onSelect={setSelected} onTrigger={setTriggering} onDelete={handleDelete} />
 						))}
 					</div>
-
-					{filteredEvents.length === 0 && <div className='text-center py-12 text-muted-foreground'>No events found</div>}
+					{filtered.length === 0 && <div className='py-12 text-center text-muted-foreground'>No events found</div>}
 				</div>
 			</div>
 
-			{/* Right side - Event details panel (always visible) */}
-			<div className='w-1/3 flex-shrink-0 overflow-y-auto border-l'>
-				{selectedEventForDetails ? (
-					<EventDetailsPanel event={selectedEventForDetails} onClose={() => setSelectedEventForDetails(null)} onUpdate={loadEvents} />
-				) : (
-					<div className='flex flex-col items-center justify-center h-full text-muted-foreground gap-2'>
-						<p className='text-sm'>Select an event to view details</p>
-					</div>
-				)}
-			</div>
+			{/* Details — 1/3 */}
+			<div className='w-1/3 shrink-0 overflow-y-auto border-l'>{selected ? <EventDetailsPanel event={selected} onClose={() => setSelected(null)} onUpdate={load} /> : <div className='flex h-full items-center justify-center text-sm text-muted-foreground'>Select an event to view details</div>}</div>
 
-			{/* ...existing modals... */}
-			{showTriggerModal && selectedEvent && (
-				<TriggerEventModal
-					event={selectedEvent}
-					open={showTriggerModal}
-					onClose={() => {
-						setShowTriggerModal(false);
-						setSelectedEvent(null);
-					}}
-				/>
-			)}
-
-			{showCreateModal && <CreateEventModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onSuccess={loadEvents} />}
+			{triggering && <TriggerEventModal event={triggering} open onClose={() => setTriggering(null)} />}
+			{showCreate && <CreateEventModal open onClose={() => setShowCreate(false)} onSuccess={load} />}
 		</div>
 	);
 }

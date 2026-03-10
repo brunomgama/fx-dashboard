@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { getAuthStatus } from '../api';
 import type { AuthStatus } from '../types';
 
 export function useAwsAuthStatus() {
@@ -12,23 +13,10 @@ export function useAwsAuthStatus() {
 		}));
 
 		try {
-			const response = await fetch('/api/aws-sso/status', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ profile: profileName }),
-			});
-
-			const data = await response.json();
-
+			const data = await getAuthStatus(profileName);
 			setAuthStatus((prev) => ({
 				...prev,
-				[profileName]: {
-					authenticated: data.authenticated,
-					identity: data.identity,
-					loading: false,
-				},
+				[profileName]: { authenticated: data.authenticated, identity: data.identity, loading: false },
 			}));
 		} catch {
 			setAuthStatus((prev) => ({
@@ -41,18 +29,11 @@ export function useAwsAuthStatus() {
 	const checkAllAuthStatus = useCallback(
 		async (profiles: string[]) => {
 			setIsChecking(true);
-			for (const profile of profiles) {
-				await checkAuthStatus(profile);
-			}
+			await Promise.all(profiles.map(checkAuthStatus));
 			setIsChecking(false);
 		},
 		[checkAuthStatus]
 	);
 
-	return {
-		authStatus,
-		isChecking,
-		checkAuthStatus,
-		checkAllAuthStatus,
-	};
+	return { authStatus, isChecking, checkAuthStatus, checkAllAuthStatus };
 }

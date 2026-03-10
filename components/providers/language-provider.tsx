@@ -2,10 +2,9 @@
 
 import enTranslations from '@/locales/en.json';
 import ptTranslations from '@/locales/pt.json';
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 type Language = 'en' | 'pt';
-
 type Translations = typeof enTranslations;
 
 interface LanguageContextType {
@@ -14,22 +13,14 @@ interface LanguageContextType {
 	t: Translations;
 }
 
-const translations = {
-	en: enTranslations,
-	pt: ptTranslations,
-};
-
+const translations = { en: enTranslations, pt: ptTranslations };
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
 	const [language, setLanguageState] = useState<Language>(() => {
-		if (typeof window !== 'undefined') {
-			const savedLanguage = localStorage.getItem('language') as Language;
-			if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'pt')) {
-				return savedLanguage;
-			}
-		}
-		return 'en';
+		if (typeof window === 'undefined') return 'en';
+		const saved = localStorage.getItem('language') as Language;
+		return saved === 'en' || saved === 'pt' ? saved : 'en';
 	});
 
 	const setLanguage = (lang: Language) => {
@@ -37,22 +28,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		localStorage.setItem('language', lang);
 	};
 
-	return (
-		<LanguageContext.Provider
-			value={{
-				language,
-				setLanguage,
-				t: translations[language],
-			}}>
-			{children}
-		</LanguageContext.Provider>
-	);
+	return <LanguageContext.Provider value={{ language, setLanguage, t: translations[language] }}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
 	const context = useContext(LanguageContext);
-	if (context === undefined) {
-		throw new Error('useLanguage must be used within a LanguageProvider');
-	}
+	if (!context) throw new Error('useLanguage must be used within LanguageProvider');
 	return context;
 }

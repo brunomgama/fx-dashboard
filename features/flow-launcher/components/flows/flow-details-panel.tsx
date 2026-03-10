@@ -1,42 +1,36 @@
 'use client';
 
-import { useFlowLauncher } from '@/components/providers/flow-launcher-provider';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { flowLauncherAPI } from '../../api';
-import { Flow } from '../../types';
+import { flowsApi } from '../../api';
+import { useFlowLauncherConfig } from '../../hooks/use-flow-launcher-config';
+import type { Flow } from '../../types';
 import { FlowBasicInfo } from './flow-basic-info';
 import { FlowTechnicalDetails } from './flow-technical-details';
 import { StateMachineVisualization } from './state-machine-visualization';
 
-interface FlowDetailsPanelProps {
+interface Props {
 	flow: Flow;
 	onClose: () => void;
 	onUpdate: () => void;
 }
 
-export function FlowDetailsPanel({ flow, onClose, onUpdate }: FlowDetailsPanelProps) {
-	const { environmentConfig, fullConfig } = useFlowLauncher();
+export function FlowDetailsPanel({ flow, onClose, onUpdate }: Props) {
+	const { apiConfig, envConfig } = useFlowLauncherConfig();
 	const [isSaving, setIsSaving] = useState(false);
 	const [name, setName] = useState(flow.name);
-	const [description, setDescription] = useState(flow.description || '');
+	const [description, setDescription] = useState(flow.description ?? '');
 
-	// Reset form when flow changes
 	useEffect(() => {
 		setName(flow.name);
-		setDescription(flow.description || '');
+		setDescription(flow.description ?? '');
 	}, [flow.id, flow.name, flow.description]);
 
 	const handleSave = async () => {
-		if (!environmentConfig) return;
 		setIsSaving(true);
 		try {
-			await flowLauncherAPI.updateFlow(environmentConfig, flow.id, {
-				user: 'system@fixxer.eu',
-				name,
-				description,
-			});
+			await flowsApi.update(apiConfig, flow.id, { user: 'dashboard-user', name, description });
 			onUpdate();
 		} catch (err) {
 			console.error('Failed to update flow:', err);
@@ -46,34 +40,29 @@ export function FlowDetailsPanel({ flow, onClose, onUpdate }: FlowDetailsPanelPr
 	};
 
 	return (
-		<div className='flex flex-col h-full rounded-lg border bg-card shadow-sm'>
-			{/* Header */}
-			<div className='flex items-center justify-between p-4 border-b bg-muted/30'>
-				<div className='flex-1 min-w-0'>
-					<h2 className='text-lg font-semibold truncate'>Flow Details</h2>
-					<p className='text-xs text-muted-foreground truncate mt-0.5'>{flow.name}</p>
+		<div className='flex h-full flex-col rounded-lg border bg-card shadow-sm'>
+			<div className='flex items-center justify-between border-b bg-muted/30 p-4'>
+				<div className='min-w-0 flex-1'>
+					<h2 className='truncate text-lg font-semibold'>Flow Details</h2>
+					<p className='mt-0.5 truncate text-xs text-muted-foreground'>{flow.name}</p>
 				</div>
-				<Button variant='ghost' size='sm' onClick={onClose} className='flex-shrink-0'>
+				<Button variant='ghost' size='sm' onClick={onClose} className='shrink-0'>
 					<X className='h-4 w-4' />
 				</Button>
 			</div>
 
-			{/* Content */}
-			<div className='flex-1 overflow-y-auto p-5 space-y-6'>
+			<div className='flex-1 space-y-6 overflow-y-auto p-5'>
 				<FlowBasicInfo name={name} description={description} onNameChange={setName} onDescriptionChange={setDescription} />
-
 				<FlowTechnicalDetails flow={flow} />
-
-				<StateMachineVisualization flowArn={flow.arn} awsProfile={fullConfig.awsProfile} region={fullConfig.region} />
+				<StateMachineVisualization flowArn={flow.arn} awsProfile={envConfig.awsProfile} region={envConfig.region} />
 			</div>
 
-			{/* Save Button - Fixed at bottom */}
-			<div className='p-4 border-t bg-muted/30'>
+			<div className='border-t bg-muted/30 p-4'>
 				<Button onClick={handleSave} disabled={isSaving} className='w-full'>
 					{isSaving ? (
 						<>
 							<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-							Saving Changes...
+							Saving...
 						</>
 					) : (
 						<>
