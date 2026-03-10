@@ -1,13 +1,22 @@
-export type FlowLauncherEnvironment = 'jaimy-staging' | 'jaimy-prod' | 'asr-staging' | 'asr-prod';
+export type Environment = 'jaimy-staging' | 'jaimy-prod' | 'asr-staging' | 'asr-prod';
+
+// Keep for backward compatibility
+export type FlowLauncherEnvironment = Environment;
 
 export interface EnvironmentConfig {
 	name: string;
 	displayName: string;
-	url: string;
-	apiKey: string;
+	// Flow Launcher URLs
+	flowLauncherUrl: string;
+	flowLauncherApiKey: string;
+	// Email Service URLs
+	emailServiceUrl: string;
+	emailServiceApiKey: string;
+	// AWS Config
 	account: string;
 	region: string;
 	awsProfile: string;
+	// UI
 	color: string;
 	darkColor: string;
 }

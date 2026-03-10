@@ -1,4 +1,6 @@
 import { AppSidebar } from '@/components/app-sidebar';
+import { EmailServiceProvider } from '@/components/providers/email-service-provider';
+import { EnvironmentProvider } from '@/components/providers/environment-provider';
 import { FlowLauncherProvider } from '@/components/providers/flow-launcher-provider';
 import { LanguageProvider } from '@/components/providers/language-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -33,14 +35,18 @@ export default function RootLayout({
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<ThemeProvider attribute='class' defaultTheme='dark' enableSystem={false} disableTransitionOnChange>
 					<LanguageProvider>
-						<FlowLauncherProvider>
-							<TooltipProvider>
-								<SidebarProvider>
-									<AppSidebar />
-									<main className='w-full'>{children}</main>
-								</SidebarProvider>
-							</TooltipProvider>
-						</FlowLauncherProvider>
+						<EnvironmentProvider>
+							<FlowLauncherProvider>
+								<EmailServiceProvider>
+									<TooltipProvider>
+										<SidebarProvider>
+											<AppSidebar />
+											<main className='w-full'>{children}</main>
+										</SidebarProvider>
+									</TooltipProvider>
+								</EmailServiceProvider>
+							</FlowLauncherProvider>
+						</EnvironmentProvider>
 					</LanguageProvider>
 				</ThemeProvider>
 			</body>
