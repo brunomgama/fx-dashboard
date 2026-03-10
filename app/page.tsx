@@ -1,5 +1,5 @@
-import SSOAuthentication from '@/features/aws-sso/authentication-page';
+import HomePage from '@/features/home/home-page';
 
-export default function HomePage() {
-	return <SSOAuthentication />;
+export default function Page() {
+	return <HomePage />;
 }
