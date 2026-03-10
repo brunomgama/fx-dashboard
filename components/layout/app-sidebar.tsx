@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/sidebar';
 import { ENVIRONMENTS } from '@/lib/environment';
 import type { Environment } from '@/lib/types';
-import { ChevronRight, Globe, Home, Key, Mail, Moon, Puzzle, Server, Settings, Sun, Workflow, Wrench, Zap } from 'lucide-react';
+import { CalendarDays, CheckSquare, ChevronRight, ClipboardList, FileText, Globe, Home, Key, ListTodo, Moon, Puzzle, Server, Settings, Sun, Workflow, Wrench, Zap } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -19,6 +19,16 @@ const NAV_ITEMS = [
 		title: 'Home',
 		url: '/',
 		icon: Home,
+	},
+	{
+		title: 'Organization',
+		icon: ClipboardList,
+		children: [
+			{ title: 'Calendar', url: '/organization/calendar', icon: CalendarDays },
+			{ title: 'Todo', url: '/organization/todo', icon: CheckSquare },
+			{ title: 'Tasks', url: '/organization/tasks', icon: ListTodo },
+			{ title: 'Notes', url: '/organization/notes', icon: FileText },
+		],
 	},
 	{
 		title: 'AWS',
@@ -37,11 +47,11 @@ const NAV_ITEMS = [
 			{ title: 'Event Configurations', url: '/flow-launcher/event-config', icon: Settings },
 		],
 	},
-	{
-		title: 'Email Service',
-		url: '/email-service',
-		icon: Mail,
-	},
+	// {
+	// 	title: 'Email Service',
+	// 	url: '/email-service',
+	// 	icon: Mail,
+	// },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -79,7 +89,7 @@ function SidebarTitle() {
 
 function SidebarNavigation() {
 	const pathname = usePathname();
-	const [openGroups, setOpenGroups] = useState<string[]>(['AWS']);
+	const [openGroups, setOpenGroups] = useState<string[]>(NAV_ITEMS.filter((item) => item.children).map((item) => item.title));
 
 	const toggleGroup = (title: string) => {
 		setOpenGroups((prev) => (prev.includes(title) ? prev.filter((g) => g !== title) : [...prev, title]));
