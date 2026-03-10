@@ -8,17 +8,10 @@ export function useFlowLauncher() {
 	return {
 		environment,
 		setEnvironment,
-		environmentConfig: {
-			name: config.name,
-			displayName: config.displayName,
-			url: config.flowLauncherUrl,
-			apiKey: config.flowLauncherApiKey,
-			account: config.account,
-			region: config.region,
-			awsProfile: config.awsProfile,
-			color: config.color,
-			darkColor: config.darkColor,
-		},
+		// Return the flow launcher config from centralized environment
+		environmentConfig: config.flowLauncher,
+		// Also expose the full config for UI needs (colors, display name, etc.)
+		fullConfig: config,
 	};
 }
 

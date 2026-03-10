@@ -1,30 +1,30 @@
 'use client';
 
-import { useEmailService } from '@/components/providers/email-service-provider';
+import { useEnvironment } from '@/components/providers/environment-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { emailServiceAPI } from '@/lib/email-service-api';
-import { Campaign, CampaignStatus, STATUS_COLORS } from '@/types/email-service';
+import { CampaignStatus, STATUS_COLORS } from '@/features/email-service';
+import { Campaign, useEmailServiceApi } from '@/lib/api';
 import { Copy, Loader2, Mail, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function CampaignsPage() {
-	const { environmentConfig } = useEmailService();
+	const { config } = useEnvironment();
+	const api = useEmailServiceApi();
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
-	const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
 
 	const loadCampaigns = useCallback(async () => {
 		setLoading(true);
 		setError('');
 		try {
-			const response = await emailServiceAPI.listCampaigns(environmentConfig, { limit: 100 });
+			const response = await api.listCampaigns({ limit: 100 });
 			const campaignData = response.results || response.Items || response.items || [];
 			setCampaigns(campaignData);
 		} catch (err) {
@@ -33,7 +33,7 @@ export default function CampaignsPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [environmentConfig]);
+	}, [api]);
 
 	useEffect(() => {
 		loadCampaigns();
@@ -43,7 +43,7 @@ export default function CampaignsPage() {
 		if (!confirm(`Are you sure you want to delete campaign "${campaign.name}"?`)) return;
 
 		try {
-			await emailServiceAPI.deleteCampaign(environmentConfig, campaign.id);
+			await api.deleteCampaign(campaign.id);
 			await loadCampaigns();
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'Failed to delete campaign');
@@ -52,11 +52,12 @@ export default function CampaignsPage() {
 
 	const handleDuplicate = async (campaign: Campaign) => {
 		try {
-			await fetch(`${environmentConfig.apiUrl}/campaigns/${campaign.id}`, {
+			// Note: This endpoint might need adjustment based on your API
+			await fetch(`${config.emailService.url}/campaigns/${campaign.id}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'x-api-key': environmentConfig.apiKey,
+					'x-api-key': config.emailService.apiKey,
 				},
 				body: JSON.stringify({ user: 'dashboard-user' }),
 			});
@@ -114,7 +115,7 @@ export default function CampaignsPage() {
 				<SidebarTrigger />
 				<div className='flex-1'>
 					<h1 className='text-xl font-semibold'>Campaigns</h1>
-					<p className='text-xs text-muted-foreground'>Environment: {environmentConfig.displayName}</p>
+					<p className='text-xs text-muted-foreground'>Environment: {config.displayName}</p>
 				</div>
 				<Button>
 					<Plus className='mr-2 h-4 w-4' />
@@ -162,12 +163,12 @@ export default function CampaignsPage() {
 						</TabsList>
 
 						<TabsContent value='all' className='flex-1 overflow-y-auto mt-4'>
-							<CampaignGrid campaigns={filteredCampaigns} onDelete={handleDelete} onDuplicate={handleDuplicate} onSelect={setSelectedCampaign} />
+							<CampaignGrid campaigns={filteredCampaigns} onDelete={handleDelete} onDuplicate={handleDuplicate} onSelect={() => {}} />
 						</TabsContent>
 
 						{Object.entries(groupedByStatus).map(([status, statusCampaigns]) => (
 							<TabsContent key={status} value={status} className='flex-1 overflow-y-auto mt-4'>
-								<CampaignGrid campaigns={statusCampaigns} onDelete={handleDelete} onDuplicate={handleDuplicate} onSelect={setSelectedCampaign} />
+								<CampaignGrid campaigns={statusCampaigns} onDelete={handleDelete} onDuplicate={handleDuplicate} onSelect={() => {}} />
 							</TabsContent>
 						))}
 					</Tabs>

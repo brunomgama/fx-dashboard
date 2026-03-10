@@ -1,11 +1,11 @@
 'use client';
 
-import { useEmailService } from '@/components/providers/email-service-provider';
+import { useEnvironment } from '@/components/providers/environment-provider';
 import { useLanguage } from '@/components/providers/language-provider';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { emailServiceAPI } from '@/lib/email-service-api';
-import { EMAIL_QUICK_LINKS, EmailQuickLink } from '@/types/email-service';
+import { EMAIL_QUICK_LINKS, EmailQuickLink } from '@/features/email-service';
+import { useEmailServiceApi } from '@/lib/api';
 import { BarChart3, FileText, Mail, Send, Settings, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -21,7 +21,8 @@ const iconMap = {
 
 export default function EmailsOverviewPage() {
 	const { t } = useLanguage();
-	const { environmentConfig } = useEmailService();
+	const { config } = useEnvironment();
+	const api = useEmailServiceApi();
 	const [stats, setStats] = useState({
 		campaigns: 0,
 		templates: 0,
@@ -35,10 +36,10 @@ export default function EmailsOverviewPage() {
 		setLoading(true);
 		setError('');
 		try {
-			const [campaignsRes, templatesRes, audiencesRes, sendersRes] = await Promise.allSettled([emailServiceAPI.countCampaigns(environmentConfig), emailServiceAPI.listTemplates(environmentConfig, { limit: 1 }), emailServiceAPI.listAudiences(environmentConfig, { limit: 1 }), emailServiceAPI.listSenders(environmentConfig, { limit: 1 })]);
+			const [campaignsRes, templatesRes, audiencesRes, sendersRes] = await Promise.allSettled([api.countCampaigns(), api.listTemplates({ limit: 1 }), api.listAudiences({ limit: 1 }), api.listSenders({ limit: 1 })]);
 
 			setStats({
-				campaigns: campaignsRes.status === 'fulfilled' ? campaignsRes.value.count : 0,
+				campaigns: campaignsRes.status === 'fulfilled' ? campaignsRes.value.count || 0 : 0,
 				templates: templatesRes.status === 'fulfilled' ? templatesRes.value.results?.length || templatesRes.value.Items?.length || templatesRes.value.items?.length || 0 : 0,
 				audiences: audiencesRes.status === 'fulfilled' ? audiencesRes.value.results?.length || audiencesRes.value.Items?.length || audiencesRes.value.items?.length || 0 : 0,
 				senders: sendersRes.status === 'fulfilled' ? sendersRes.value.results?.length || sendersRes.value.Items?.length || sendersRes.value.items?.length || 0 : 0,
@@ -49,7 +50,7 @@ export default function EmailsOverviewPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [environmentConfig]);
+	}, [api]);
 
 	useEffect(() => {
 		loadStats();
@@ -71,7 +72,7 @@ export default function EmailsOverviewPage() {
 				<SidebarTrigger />
 				<div className='flex-1'>
 					<h1 className='text-xl font-semibold'>{t.navigation.emails}</h1>
-					<p className='text-xs text-muted-foreground'>Environment: {environmentConfig.displayName}</p>
+					<p className='text-xs text-muted-foreground'>Environment: {config.displayName}</p>
 				</div>
 				{error && (
 					<Button variant='outline' size='sm' onClick={loadStats}>

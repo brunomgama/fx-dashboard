@@ -1,14 +1,8 @@
 'use client';
 
 import { DEFAULT_ENVIRONMENT, ENVIRONMENTS } from '@/lib/environments';
-import { Environment, EnvironmentConfig } from '@/types/flow-launcher';
+import type { Environment, EnvironmentContextType } from '@/lib/types';
 import React, { createContext, useContext, useState } from 'react';
-
-interface EnvironmentContextType {
-	environment: Environment;
-	setEnvironment: (env: Environment) => void;
-	config: EnvironmentConfig;
-}
 
 const EnvironmentContext = createContext<EnvironmentContextType | undefined>(undefined);
 

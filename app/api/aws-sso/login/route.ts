@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
 	try {
 		const { profile } = await request.json();
 
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 		let verificationCode = '';
 		let resolved = false;
 
-		return new Promise((resolve) => {
+		return new Promise<NextResponse>((resolve) => {
 			// Capture stdout
 			awsProcess.stdout.on('data', (data) => {
 				const chunk = data.toString();

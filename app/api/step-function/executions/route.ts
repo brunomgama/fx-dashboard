@@ -1,4 +1,4 @@
-import { ExecutionListItem, ListExecutionsCommand, SFNClient } from '@aws-sdk/client-sfn';
+import { ListExecutionsCommand, SFNClient } from '@aws-sdk/client-sfn';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { NextResponse } from 'next/server';
 

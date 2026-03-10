@@ -1,4 +1,4 @@
-import { ASLCatch, ASLChoice, ASLDefinition, ASLState } from '@/types/flow-launcher';
+import { ASLCatch, ASLChoice, ASLDefinition, ASLState } from '@/features/flow-launcher';
 import { Edge, Node } from '@xyflow/react';
 
 /**

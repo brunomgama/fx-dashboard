@@ -1,16 +1,14 @@
 'use client';
 
-import { EventConfigsList } from '@/components/flow-launcher/eventconfig/event-configs-list';
-import { EventsList } from '@/components/flow-launcher/events/events-list';
-import { FlowsList } from '@/components/flow-launcher/flows/flows-list';
 import { useFlowLauncher } from '@/components/providers/flow-launcher-provider';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EventConfigsList, EventsList, FlowsList } from '@/features/flow-launcher';
 
 export default function FlowLauncherPage() {
 	const { t } = useLanguage();
-	const { environmentConfig } = useFlowLauncher();
+	const { fullConfig } = useFlowLauncher();
 
 	return (
 		<div className='flex flex-col h-screen'>
@@ -18,7 +16,7 @@ export default function FlowLauncherPage() {
 				<SidebarTrigger />
 				<div className='flex-1'>
 					<h1 className='text-xl font-semibold'>{t.navigation.flowLauncher}</h1>
-					<p className='text-xs text-muted-foreground'>Environment: {environmentConfig.displayName}</p>
+					<p className='text-xs text-muted-foreground'>Environment: {fullConfig.displayName}</p>
 				</div>
 			</header>
 

@@ -2,6 +2,7 @@
 	"navigation": {
 		"home": "Início",
 		"flowLauncher": "Flow Launcher",
+		"executions": "Execuções",
 		"emails": "Emails",
 		"smartEvents": "Eventos Inteligentes"
 	},

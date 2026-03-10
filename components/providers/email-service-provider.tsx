@@ -4,18 +4,14 @@ import { useEnvironment } from './environment-provider';
 
 export function useEmailService() {
 	const { environment, setEnvironment, config } = useEnvironment();
-	
+
 	return {
 		environment,
 		setEnvironment,
-		environmentConfig: {
-			name: config.name,
-			displayName: config.displayName,
-			apiUrl: config.emailServiceUrl,
-			apiKey: config.emailServiceApiKey,
-			region: config.region,
-			awsProfile: config.awsProfile,
-		},
+		// Return the email service config from centralized environment
+		environmentConfig: config.emailService,
+		// Also expose the full config for UI needs (colors, display name, etc.)
+		fullConfig: config,
 	};
 }
 

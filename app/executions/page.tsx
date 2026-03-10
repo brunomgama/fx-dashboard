@@ -1,95 +1,13 @@
 'use client';
 
-import { useFlowLauncher } from '@/components/providers/flow-launcher-provider';
-import { useLanguage } from '@/components/providers/language-provider';
-import { ExecutionDetailPanel } from '@/components/step-functions/execution-detail-panel';
+import { useEnvironment } from '@/components/providers/environment-provider';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { type Company, ENV_COLORS, type Env, ExecutionDetailPanel, KNOWN_COMPANIES, KNOWN_ENVS, KNOWN_PROJECTS, PROJECT_COLORS, type ParsedName, type Project, type StateMachine, parseName } from '@/features/executions';
 import { ExternalLink, Loader2, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface StateMachine {
-	name: string;
-	stateMachineArn: string;
-	type: string;
-	creationDate: string;
-}
-
-interface ParsedName {
-	project: string;
-	name: string;
-	env: string;
-	company: string;
-	raw: string;
-}
-
-// ─── Name parser ──────────────────────────────────────────────────────────────
-// Pattern: {project}-{...name...}-{env}-{company}
-// env:     dev | staging | prod
-// company: jaimy | mri | asr
-// project: launcher | email | smart-events (etc.)
-
-const KNOWN_ENVS = ['dev', 'staging', 'prod'] as const;
-const KNOWN_COMPANIES = ['jaimy', 'mri', 'asr'] as const;
-const KNOWN_PROJECTS = ['launcher', 'email', 'smart-events'] as const;
-
-type Env = (typeof KNOWN_ENVS)[number];
-type Company = (typeof KNOWN_COMPANIES)[number];
-type Project = (typeof KNOWN_PROJECTS)[number];
-
-function parseName(name: string): ParsedName {
-	const parts = name.split('-');
-
-	// Find company (last known company segment from the right)
-	let companyIdx = -1;
-	for (let i = parts.length - 1; i >= 0; i--) {
-		if ((KNOWN_COMPANIES as readonly string[]).includes(parts[i])) {
-			companyIdx = i;
-			break;
-		}
-	}
-
-	// Find env (just before company)
-	let envIdx = -1;
-	for (let i = (companyIdx === -1 ? parts.length : companyIdx) - 1; i >= 0; i--) {
-		if ((KNOWN_ENVS as readonly string[]).includes(parts[i])) {
-			envIdx = i;
-			break;
-		}
-	}
-
-	const company = companyIdx !== -1 ? parts[companyIdx] : 'unknown';
-	const env = envIdx !== -1 ? parts[envIdx] : 'unknown';
-
-	// Project is the first segment(s) before the middle name
-	// Middle name is everything between project and env
-	const middleStart = 1;
-	const middleEnd = envIdx !== -1 ? envIdx : parts.length;
-	const project = parts[0] ?? 'unknown';
-	const middle = parts.slice(middleStart, middleEnd).join('-');
-
-	return { project, name: middle || name, env, company, raw: name };
-}
-
-// ─── Filter chips ─────────────────────────────────────────────────────────────
-
-const ENV_COLORS: Record<string, string> = {
-	prod: 'bg-red-100 text-red-700 border-red-300',
-	staging: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-	dev: 'bg-green-100 text-green-700 border-green-300',
-	unknown: 'bg-gray-100 text-gray-600 border-gray-300',
-};
-
-const PROJECT_COLORS: Record<string, string> = {
-	launcher: 'bg-blue-100 text-blue-700 border-blue-300',
-	email: 'bg-purple-100 text-purple-700 border-purple-300',
-	'smart-events': 'bg-cyan-100 text-cyan-700 border-cyan-300',
-	unknown: 'bg-gray-100 text-gray-600 border-gray-300',
-};
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
@@ -143,8 +61,7 @@ function FilterGroup<T extends string>({ label, options, selected, onChange }: {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ExecutionsPage() {
-	const { t } = useLanguage();
-	const { environmentConfig } = useFlowLauncher();
+	const { config } = useEnvironment();
 
 	const [stateMachines, setStateMachines] = useState<StateMachine[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -194,8 +111,8 @@ export default function ExecutionsPage() {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					profile: environmentConfig.awsProfile,
-					region: environmentConfig.region,
+					profile: config.awsProfile,
+					region: config.region,
 				}),
 			});
 			if (!res.ok) {
@@ -209,7 +126,7 @@ export default function ExecutionsPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [environmentConfig.awsProfile, environmentConfig.region]);
+	}, [config.awsProfile, config.region]);
 
 	useEffect(() => {
 		loadStateMachines();
@@ -219,7 +136,11 @@ export default function ExecutionsPage() {
 
 	const toggle = <T extends string>(set: Set<T>, val: T): Set<T> => {
 		const next = new Set(set);
-		next.has(val) ? next.delete(val) : next.add(val);
+		if (next.has(val)) {
+			next.delete(val);
+		} else {
+			next.add(val);
+		}
 		return next;
 	};
 
@@ -245,7 +166,7 @@ export default function ExecutionsPage() {
 				<SidebarTrigger />
 				<div className='flex-1'>
 					<h1 className='text-xl font-semibold'>Executions</h1>
-					<p className='text-xs text-muted-foreground'>Environment: {environmentConfig.displayName}</p>
+					<p className='text-xs text-muted-foreground'>Environment: {config.displayName}</p>
 				</div>
 			</header>
 
@@ -300,7 +221,7 @@ export default function ExecutionsPage() {
 						<div className='overflow-y-auto flex-1 min-h-0'>
 							<div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-4'>
 								{filtered.map((sm, i) => (
-									<StateMachineCard key={sm.stateMachineArn} sm={sm} parsed={filteredParsed[i]} region={environmentConfig.region} isSelected={selectedSM?.stateMachineArn === sm.stateMachineArn} onSelect={() => setSelectedSM(sm)} />
+									<StateMachineCard key={sm.stateMachineArn} sm={sm} parsed={filteredParsed[i]} region={config.region} isSelected={selectedSM?.stateMachineArn === sm.stateMachineArn} onSelect={() => setSelectedSM(sm)} />
 								))}
 							</div>
 							{filtered.length === 0 && <div className='text-center py-16 text-muted-foreground'>No state machines match your filters</div>}
@@ -316,7 +237,7 @@ export default function ExecutionsPage() {
 						</div>
 						{/* Detail panel */}
 						<div className='min-h-0 overflow-hidden flex flex-col flex-shrink-0' style={{ width: `${panelWidth}%` }}>
-							<ExecutionDetailPanel sm={selectedSM} region={environmentConfig.region} profile={environmentConfig.awsProfile} onClose={() => setSelectedSM(null)} />
+							<ExecutionDetailPanel sm={selectedSM} region={config.region} profile={config.awsProfile} onClose={() => setSelectedSM(null)} />
 						</div>
 					</>
 				)}

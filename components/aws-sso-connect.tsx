@@ -1,13 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAwsAuthStatus } from '@/hooks/use-aws-auth-status';
+import { ProfileCard, useAwsAuthStatus, VerificationBox, type AWSProfile, type ProfileStatus } from '@/features/aws-sso';
 import { AWS_PROFILES } from '@/lib/aws-profiles';
-import { AWSProfile, ProfileStatus } from '@/types/aws-sso';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { ProfileCard } from './aws-sso/profile-card';
-import { VerificationBox } from './aws-sso/verification-box';
 
 export function AwsSsoConnect() {
 	const [profileStatus, setProfileStatus] = useState<ProfileStatus>({});

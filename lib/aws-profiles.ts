@@ -1,4 +1,4 @@
-import { AWSProfile } from '@/types/aws-sso';
+import type { AWSProfile } from '@/features/aws-sso';
 
 export const AWS_PROFILES: AWSProfile[] = [
 	{
