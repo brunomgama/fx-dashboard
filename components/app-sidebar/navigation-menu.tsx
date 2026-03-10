@@ -2,7 +2,7 @@
 
 import { useLanguage } from '@/components/providers/language-provider';
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Calendar, Home, Mail, Zap } from 'lucide-react';
+import { Calendar, Crosshair, Home, Mail, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -20,6 +20,11 @@ export function NavigationMenu() {
 			title: t.navigation.flowLauncher,
 			url: '/flow-launcher',
 			icon: Zap,
+		},
+		{
+			title: t.navigation.executions,
+			url: '/executions',
+			icon: Crosshair,
 		},
 		{
 			title: t.navigation.emails,
