@@ -3,56 +3,15 @@
 import { useEnvironment } from '@/components/providers/environment-provider';
 import { useLanguage } from '@/components/providers/language-provider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub } from '@/components/ui/sidebar';
 import { ENVIRONMENTS } from '@/lib/environment';
 import type { Environment } from '@/lib/types';
-import { CalendarDays, CheckSquare, ChevronRight, ClipboardList, FileText, Globe, Home, Key, ListTodo, Moon, Puzzle, Server, Settings, Sun, Workflow, Wrench, Zap } from 'lucide-react';
+import { getDefaultOpenGroups, NAV_ITEMS, type NavigationItem } from '@/lib/sidebar';
+import { ChevronRight, Globe, Moon, Server, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-
-// ─── Navigation config ────────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-	{
-		title: 'Home',
-		url: '/',
-		icon: Home,
-	},
-	{
-		title: 'Organization',
-		icon: ClipboardList,
-		children: [
-			{ title: 'Calendar', url: '/organization/calendar', icon: CalendarDays },
-			{ title: 'Todo', url: '/organization/todo', icon: CheckSquare },
-			{ title: 'Tasks', url: '/organization/tasks', icon: ListTodo },
-			{ title: 'Notes', url: '/organization/notes', icon: FileText },
-		],
-	},
-	{
-		title: 'AWS',
-		icon: Server,
-		children: [
-			{ title: 'Authentication', url: '/sso-authentication', icon: Key },
-			{ title: 'AWS Tools', url: '/aws-tools', icon: Wrench },
-		],
-	},
-	{
-		title: 'Flow Launcher',
-		icon: Workflow,
-		children: [
-			{ title: 'Flows', url: '/flow-launcher/flows', icon: Puzzle },
-			{ title: 'Events', url: '/flow-launcher/events', icon: Zap },
-			{ title: 'Event Configurations', url: '/flow-launcher/event-config', icon: Settings },
-		],
-	},
-	// {
-	// 	title: 'Email Service',
-	// 	url: '/email-service',
-	// 	icon: Mail,
-	// },
-];
+import { JSX, useState } from 'react';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -89,55 +48,50 @@ function SidebarTitle() {
 
 function SidebarNavigation() {
 	const pathname = usePathname();
-	const [openGroups, setOpenGroups] = useState<string[]>(NAV_ITEMS.filter((item) => item.children).map((item) => item.title));
+	const [openGroups, setOpenGroups] = useState<string[]>(getDefaultOpenGroups());
 
 	const toggleGroup = (title: string) => {
 		setOpenGroups((prev) => (prev.includes(title) ? prev.filter((g) => g !== title) : [...prev, title]));
 	};
 
+	function renderNavItems(items: NavigationItem[], level = 0): JSX.Element[] {
+		return items.map((item) => {
+			if (item.children) {
+				const isOpen = openGroups.includes(item.title);
+				return (
+					<SidebarMenuItem key={item.title} className={level === 1 ? 'pl-4' : level === 2 ? 'pl-8' : ''}>
+						<SidebarMenuButton onClick={() => toggleGroup(item.title)}>
+							<item.icon className='h-4 w-4' />
+							<span>{item.title}</span>
+							<ChevronRight className={`ml-auto h-4 w-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+						</SidebarMenuButton>
+						{isOpen && (
+							<SidebarMenuSub>
+								{renderNavItems(item.children, level + 1)}
+							</SidebarMenuSub>
+						)}
+					</SidebarMenuItem>
+				);
+			}
+
+			return (
+				<SidebarMenuItem key={item.url} className={level === 1 ? 'pl-4' : level === 2 ? 'pl-8' : ''}>
+					<SidebarMenuButton asChild isActive={pathname === item.url}>
+						<Link href={item.url!}>
+							<item.icon className='h-4 w-4' />
+							<span>{item.title}</span>
+						</Link>
+					</SidebarMenuButton>
+				</SidebarMenuItem>
+			);
+		});
+	}
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupContent>
 				<SidebarMenu>
-					{NAV_ITEMS.map((item) => {
-						if (item.children) {
-							const isOpen = openGroups.includes(item.title);
-							return (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton onClick={() => toggleGroup(item.title)}>
-										<item.icon className='h-4 w-4' />
-										<span>{item.title}</span>
-										<ChevronRight className={`ml-auto h-4 w-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
-									</SidebarMenuButton>
-									{isOpen && (
-										<SidebarMenuSub>
-											{item.children.map((child) => (
-												<SidebarMenuSubItem key={child.url}>
-													<SidebarMenuSubButton asChild isActive={pathname === child.url}>
-														<Link href={child.url}>
-															<child.icon className='h-4 w-4' />
-															<span>{child.title}</span>
-														</Link>
-													</SidebarMenuSubButton>
-												</SidebarMenuSubItem>
-											))}
-										</SidebarMenuSub>
-									)}
-								</SidebarMenuItem>
-							);
-						}
-
-						return (
-							<SidebarMenuItem key={item.url}>
-								<SidebarMenuButton asChild isActive={pathname === item.url}>
-									<Link href={item.url!}>
-										<item.icon className='h-4 w-4' />
-										<span>{item.title}</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						);
-					})}
+					{renderNavItems(NAV_ITEMS)}
 				</SidebarMenu>
 			</SidebarGroupContent>
 		</SidebarGroup>
