@@ -1,7 +1,7 @@
 'use client';
 
+import { Environment, EnvironmentContextType } from '@/interface/environment-profiles';
 import { DEFAULT_ENVIRONMENT, ENVIRONMENTS } from '@/lib/environment';
-import { Environment, EnvironmentContextType } from '@/lib/types';
 import { createContext, useContext, useState } from 'react';
 
 const EnvironmentContext = createContext<EnvironmentContextType | undefined>(undefined);
