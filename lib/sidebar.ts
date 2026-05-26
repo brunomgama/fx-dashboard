@@ -1,5 +1,5 @@
 import { NavigationItem } from '@/interface/sidebar';
-import { Bot, CalendarDays, CheckSquare, ClipboardList, FileText, Home, Key, ListTodo, Puzzle, Settings, Workflow, Wrench, Zap } from 'lucide-react';
+import { BookOpen, Bot, CalendarDays, CheckSquare, ClipboardList, FileText, Home, Key, Library, ListTodo, MessageSquare, Puzzle, Settings, Workflow, Wrench, Zap } from 'lucide-react';
 
 export const NAV_ITEMS: NavigationItem[] = [
 	{
@@ -15,6 +15,14 @@ export const NAV_ITEMS: NavigationItem[] = [
 				title: 'Claude Code',
 				url: '/claude-code',
 				icon: Bot,
+			},
+			{
+				title: 'Wiki',
+				icon: BookOpen,
+				children: [
+					{ title: 'Browse', url: '/wiki', icon: Library },
+					{ title: 'Chat', url: '/wiki/chat', icon: MessageSquare },
+				],
 			},
 			{
 				title: 'Organization',

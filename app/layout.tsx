@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<LanguageProvider>
 						<EnvironmentProvider>
 							<TooltipProvider>
-								<SidebarProvider>
+								<SidebarProvider >
 									<AppSidebar />
 									<main className='w-full'>{children}</main>
 								</SidebarProvider>
