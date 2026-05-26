@@ -1,25 +1,19 @@
 {
-	"navigation": {
-		"home": "Início",
-		"flowLauncher": "Flow Launcher",
-		"executions": "Execuções",
-		"emails": "Emails",
-		"smartEvents": "Eventos Inteligentes"
-	},
-	"settings": {
-		"theme": "Tema",
-		"language": "Idioma",
-		"light": "Claro",
-		"dark": "Escuro"
+	"dashboard": {
+		"title": "O Meu Dashboard",
+		"welcome": "Bem-vindo ao teu dashboard"
 	},
 	"languages": {
 		"en": "Inglês",
 		"pt": "Português"
 	},
-	"dashboard": {
-		"title": "Meu Painel",
-		"welcome": "Bem-vindo ao seu painel",
-		"awsSso": "Conexões AWS SSO",
-		"awsSsoDescription": "Conecte-se às suas contas AWS usando Single Sign-On"
+	"navigation": {
+		"home": "Início"
+	},
+	"settings": {
+		"dark": "Escuro",
+		"language": "Idioma",
+		"light": "Claro",
+		"theme": "Tema"
 	}
 }

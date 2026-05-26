@@ -1,14 +1,17 @@
 'use client';
 
-import { Environment, EnvironmentContextType } from '@/interface/environment-profiles';
-import { DEFAULT_ENVIRONMENT, ENVIRONMENTS } from '@/lib/environment';
+import { DEFAULT_ENVIRONMENT, ENVIRONMENTS } from '@/config/environments';
+import type { Environment, EnvironmentContextType } from '@/types/environment';
 import { createContext, useContext, useState } from 'react';
 
 const EnvironmentContext = createContext<EnvironmentContextType | undefined>(undefined);
 
 export function EnvironmentProvider({ children }: { children: React.ReactNode }) {
 	const [environment, setEnvironmentState] = useState<Environment>(() => {
-		if (typeof window === 'undefined') return DEFAULT_ENVIRONMENT;
+		if (typeof window === 'undefined') {
+			return DEFAULT_ENVIRONMENT;
+		}
+
 		const saved = localStorage.getItem('selected-environment') as Environment;
 		return saved && ENVIRONMENTS[saved] ? saved : DEFAULT_ENVIRONMENT;
 	});
