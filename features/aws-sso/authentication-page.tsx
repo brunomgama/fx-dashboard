@@ -9,7 +9,7 @@ import { useAwsAuthStatus } from '@/features/aws-sso/hooks/use-aws-auth-status';
 import { AWS_PROFILES, AWSProfile } from '@/lib/aws-profiles';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { ProfileStatus, SSOResult } from './interface/sso-types';
+import { ProfileStatus, SSOResult } from '../../interface/sso-types';
 
 export default function SSOAuthentication() {
 	const [profileStatus, setProfileStatus] = useState<ProfileStatus>({});

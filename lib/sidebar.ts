@@ -1,11 +1,5 @@
+import { NavigationItem } from '@/interface/sidebar';
 import { Bot, CalendarDays, CheckSquare, ClipboardList, FileText, Home, Key, ListTodo, Puzzle, Settings, Workflow, Wrench, Zap } from 'lucide-react';
-
-export type NavigationItem = {
-	title: string;
-	icon: React.ComponentType<{ className?: string }>;
-	url?: string;
-	children?: NavigationItem[];
-};
 
 export const NAV_ITEMS: NavigationItem[] = [
 	{

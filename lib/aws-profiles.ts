@@ -1,8 +1,4 @@
-export interface AWSProfile {
-	name: string;
-	displayName: string;
-	accountId: string;
-}
+import { AWSProfile } from '@/interface/environment-profiles';
 
 export const AWS_PROFILES: AWSProfile[] = [
 	{

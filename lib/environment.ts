@@ -1,4 +1,4 @@
-import type { Environment, EnvironmentConfig } from './types';
+import { Environment, EnvironmentConfig } from '@/interface/environment-profiles';
 
 export const ENVIRONMENTS: Record<Environment, EnvironmentConfig> = {
 	'jaimy-staging': {

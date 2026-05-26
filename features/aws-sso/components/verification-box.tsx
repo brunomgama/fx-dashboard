@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
-import { AuthenticationComponent } from '../interface/sso-types';
+import { AuthenticationComponent } from '../../../interface/sso-types';
 
 export function VerificationBox({ currentProfile, verificationCode, ssoUrl, onCopy }: AuthenticationComponent) {
 	return (

@@ -1,3 +1,9 @@
+export interface AWSProfile {
+	name: string;
+	displayName: string;
+	accountId: string;
+}
+
 export type Environment = 'jaimy-staging' | 'jaimy-prod' | 'asr-staging' | 'asr-prod';
 
 export interface EnvironmentConfig {

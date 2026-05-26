@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
+import { AuthStatus } from '../../../interface/sso-types';
 import { getAuthStatus } from '../api';
-import { AuthStatus } from '../interface/sso-types';
 
 export function useAwsAuthStatus() {
 	const [authStatus, setAuthStatus] = useState<AuthStatus>({});
