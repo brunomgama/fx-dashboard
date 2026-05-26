@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node -e \"const net=require('net');const try_port=(p)=>{const s=net.createServer();s.on('error',()=>try_port(p+1));s.listen(p,()=>s.close(()=>{require('child_process').spawn('next',['dev','-p',p],{stdio:'inherit',shell:false})}))};try_port(parseInt(process.env.PORT)||3000)\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

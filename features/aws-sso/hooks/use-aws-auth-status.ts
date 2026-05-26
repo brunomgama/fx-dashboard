@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getAuthStatus } from '../api';
-import type { AuthStatus } from '../types';
+import { AuthStatus } from '../interface/sso-types';
 
 export function useAwsAuthStatus() {
 	const [authStatus, setAuthStatus] = useState<AuthStatus>({});
@@ -32,7 +32,7 @@ export function useAwsAuthStatus() {
 			await Promise.all(profiles.map(checkAuthStatus));
 			setIsChecking(false);
 		},
-		[checkAuthStatus]
+		[checkAuthStatus],
 	);
 
 	return { authStatus, isChecking, checkAuthStatus, checkAllAuthStatus };

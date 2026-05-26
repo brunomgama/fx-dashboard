@@ -1,8 +1,5 @@
-import { CalendarDays, CheckSquare, ClipboardList, FileText, Home, Key, ListTodo, Puzzle, Server, Settings, Workflow, Wrench, Zap } from 'lucide-react';
+import { Bot, CalendarDays, CheckSquare, ClipboardList, FileText, Home, Key, ListTodo, Puzzle, Settings, Workflow, Wrench, Zap } from 'lucide-react';
 
-/**
- * Navigation item structure supporting multi-level hierarchy
- */
 export type NavigationItem = {
 	title: string;
 	icon: React.ComponentType<{ className?: string }>;
@@ -10,10 +7,6 @@ export type NavigationItem = {
 	children?: NavigationItem[];
 };
 
-/**
- * Application navigation structure
- * Three-level hierarchy: Home, Fixxer > (Organization, AWS, Flow Launcher) > children
- */
 export const NAV_ITEMS: NavigationItem[] = [
 	{
 		title: 'Home',
@@ -24,6 +17,11 @@ export const NAV_ITEMS: NavigationItem[] = [
 		title: 'Personal',
 		icon: Wrench,
 		children: [
+			{
+				title: 'Claude Code',
+				url: '/claude-code',
+				icon: Bot,
+			},
 			{
 				title: 'Organization',
 				icon: ClipboardList,
@@ -40,14 +38,7 @@ export const NAV_ITEMS: NavigationItem[] = [
 		title: 'Fixxer',
 		icon: Wrench,
 		children: [
-			{
-				title: 'AWS',
-				icon: Server,
-				children: [
-					{ title: 'Authentication', url: '/sso-authentication', icon: Key },
-					{ title: 'AWS Tools', url: '/aws-tools', icon: Wrench },
-				],
-			},
+			{ title: 'Authentication', url: '/sso-authentication', icon: Key },
 			{
 				title: 'Flow Launcher',
 				icon: Workflow,
@@ -61,9 +52,6 @@ export const NAV_ITEMS: NavigationItem[] = [
 	},
 ];
 
-/**
- * Get all navigation items with children that should be expanded by default
- */
 export function getDefaultOpenGroups(): string[] {
 	return NAV_ITEMS.filter((item) => item.children).map((item) => item.title);
 }

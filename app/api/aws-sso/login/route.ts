@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 								message: 'Please complete authentication in your browser',
 								verificationUrl: verificationUrl,
 								verificationCode: verificationCode,
-							})
+							}),
 						);
 					}
 				}
@@ -68,7 +68,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 								message: 'Please complete authentication in your browser',
 								verificationUrl: verificationUrl,
 								verificationCode: verificationCode,
-							})
+							}),
 						);
 					}
 				}
@@ -78,15 +78,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 			setTimeout(() => {
 				if (!resolved) {
 					resolved = true;
-					resolve(
-						NextResponse.json(
-							{
-								error: 'Could not extract verification URL from AWS SSO output',
-								details: output,
-							},
-							{ status: 500 }
-						)
-					);
+					resolve(NextResponse.json({ error: 'Could not extract verification URL from AWS SSO output', details: output }, { status: 500 }));
 				}
 			}, 5000);
 
@@ -94,15 +86,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 			awsProcess.on('error', (error) => {
 				if (!resolved) {
 					resolved = true;
-					resolve(
-						NextResponse.json(
-							{
-								error: 'Failed to start AWS SSO login',
-								details: error.message,
-							},
-							{ status: 500 }
-						)
-					);
+					resolve(NextResponse.json({ error: 'Failed to start AWS SSO login', details: error.message }, { status: 500 }));
 				}
 			});
 		});
@@ -110,12 +94,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
 		console.error('AWS SSO Login Error:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to login to AWS SSO',
-				details: errorMessage,
-			},
-			{ status: 500 }
-		);
+		return NextResponse.json({ error: 'Failed to login to AWS SSO', details: errorMessage }, { status: 500 });
 	}
 }
