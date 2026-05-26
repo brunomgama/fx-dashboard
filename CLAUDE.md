@@ -39,6 +39,9 @@ components/
   ui/                       → shadcn primitives — never modify these files
   layout/                   → app chrome: sidebar, header
   providers/                → React context providers
+  error/                    → shared ErrorComponent
+  loading/                  → shared LoadingComponent
+  (domain)/                 → feature-specific components (e.g. aws-sso/, flow-launcher/)
 hooks/                      → all custom React hooks (use-*.ts)
 services/                   → server-side business logic (Node.js, fs, AWS, external APIs)
 types/                      → TypeScript interfaces and types
@@ -76,7 +79,7 @@ export default function MyPage() {
     <div className='flex h-screen flex-col'>
       <header className='sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6'>
         <SidebarTrigger />
-        <h1 className='text-xl font-semibold'>Page Title</h1>
+        <h1 className='font-montserrat text-xl font-black'>Page Title</h1>
       </header>
       <div className='flex-1 overflow-auto p-6'>
         <MyComponent />
@@ -90,7 +93,7 @@ export default function MyPage() {
 
 ## Navigation
 
-To add a page to the sidebar, add an entry to `NAV_ITEMS` in `config/sidebar.ts`. The sidebar supports three levels of nesting. Icons come from `lucide-react`.
+To add a page to the sidebar, add an entry to `NAV_ITEMS` in `config/navigation.ts`. The sidebar supports three levels of nesting. Icons come from `lucide-react`.
 
 ---
 
@@ -117,17 +120,27 @@ export async function getWikiFiles() { ... }
 
 Validation, error mapping, and `Response` construction happen in the route. Everything else happens in the service.
 
+For routes that are environment-aware, the active environment is passed as a query param by the client and read in the route:
+
+```ts
+// client
+fetch(`/api/flow-launcher/flows?environment=${environment}`)
+
+// route
+const environment = searchParams.get('environment') as Environment;
+```
+
 ---
 
 ## Typography
 
-Font: **Montserrat** (`font-montserrat`). Loaded weights: 400, 500, 600, 700, 900.
+Font: **Montserrat** (`font-montserrat`). Loaded weights: 100, 300, 400, 500, 600, 700, 900.
 
 | Role | Tailwind class | Weight |
 |---|---|---|
 | Titles (sidebar title, page headings) | `font-montserrat font-black` | 900 |
 | Selectors / interactive labels | `font-montserrat font-semibold` | 600 |
-| Body / general text | `font-montserrat font-thin` | 100 — falls back to 400 (lightest loaded) |
+| Body / general text | `font-montserrat font-light` | 300 |
 
 Tailwind weight reference:
 
@@ -177,7 +190,7 @@ Tailwind weight reference:
 - **No `setState` synchronously inside `useEffect`**. The `react-hooks/set-state-in-effect` rule will error.
   - Initialize state with the loading value: `useState(true)` for loading flags.
   - Only call `setState` inside `.then()`, `.catch()`, `.finally()`, or after an `await`.
-- **No `useCallback` or `useMemo`** — there is no React Compiler; add memoization only when a measurable performance problem exists and profile first.
+- **No `useCallback` or `useMemo`** except when a function is a direct dependency of `useEffect` (required to keep the effect stable). All other uses need a measurable performance justification.
 - **No `useEffect` for derived state** — compute derived values directly in the render function.
 - No `useEffect` to sync two pieces of React state — restructure instead.
 - No floating promises in event handlers — either `void fn()` or `fn().catch(...)`.
